@@ -1,0 +1,1021 @@
+Date: 31/08/21
+Database: BikeStores
+
+BASICS
+DATA MANIPULATION
+
+use BikeStores;
+
+--Select
+SELECT
+    *
+FROM
+    sales.customers;
+
+SELECT
+    first_name,
+    last_name
+FROM
+    sales.customers
+ORDER BY
+    first_name;
+
+--ORDER BY
+SELECT
+	first_name,
+	last_name
+FROM
+	sales.customers
+ORDER BY
+	first_name DESC;
+
+SELECT
+    city,
+    first_name,
+    last_name
+FROM
+    sales.customers
+ORDER BY
+    state;
+
+SELECT
+    first_name,
+    last_name
+FROM
+    sales.customers
+ORDER BY
+    LEN(first_name) DESC;
+
+--OFFSET FETCH
+SELECT
+    product_name,
+    list_price
+FROM
+    production.products
+ORDER BY
+    list_price,
+    product_name 
+OFFSET 10 ROWS;
+
+SELECT
+    product_name,
+    list_price
+FROM
+    production.products
+ORDER BY
+    list_price,
+    product_name 
+OFFSET 10 ROWS 
+FETCH NEXT 10 ROWS ONLY;
+
+SELECT
+    product_name,
+    list_price
+FROM
+    production.products
+ORDER BY
+    list_price DESC,
+    product_name 
+OFFSET 0 ROWS 
+FETCH FIRST 10 ROWS ONLY;
+
+Date: 01/09/21
+
+
+--SELECT TOP
+SELECT TOP 10
+    product_name, 
+    list_price
+FROM
+    production.products
+ORDER BY 
+    list_price DESC;
+
+SELECT TOP 1 PERCENT
+    product_name, 
+    list_price
+FROM
+    production.products
+ORDER BY 
+    list_price DESC;
+
+SELECT TOP 3 WITH TIES
+    product_name, 
+    list_price
+FROM
+    production.products
+ORDER BY 
+    list_price DESC;
+
+--SELECT DISTINCT
+SELECT DISTINCT
+    city,
+    state
+FROM
+    sales.customers
+
+--WHERE, BETWEEN,ANDS
+SELECT
+    product_id,
+    product_name,
+    category_id,
+    model_year,
+    list_price
+FROM
+    production.products
+WHERE
+    list_price BETWEEN 1899.00 AND 1999.99
+ORDER BY
+    list_price DESC;
+
+--IN
+SELECT
+    product_id,
+    product_name,
+    category_id,
+    model_year,
+    list_price
+FROM
+    production.products
+WHERE
+    list_price IN (299.99, 369.99, 489.99)
+ORDER BY
+    list_price DESC;
+
+SELECT
+    customer_id,
+    first_name,
+    last_name,
+    phone
+FROM
+    sales.customers
+WHERE
+    phone = NULL
+ORDER BY
+    first_name,
+    last_name;
+
+SELECT
+    customer_id,
+    first_name,
+    last_name,
+    phone
+FROM
+    sales.customers
+WHERE
+    phone IS NULL
+ORDER BY
+    first_name,
+    last_name;
+
+SELECT
+    customer_id,
+    first_name,
+    last_name,
+    phone
+FROM
+    sales.customers
+WHERE
+    phone IS NOT NULL
+ORDER BY
+    first_name,
+    last_name;
+
+--OR
+SELECT
+    *
+FROM
+    production.products
+WHERE
+    (brand_id = 1 OR brand_id = 2)
+AND list_price > 1000
+ORDER BY
+    brand_id;
+
+SELECT
+    *
+FROM
+    production.products
+WHERE
+    brand_id = 1
+OR brand_id = 2
+AND list_price > 1000
+ORDER BY
+    brand_id DESC;
+
+SELECT
+    *
+FROM
+    production.products
+WHERE
+    category_id = 1
+AND list_price > 400
+AND brand_id = 1
+ORDER BY
+    list_price DESC;
+
+--SUBQUERY
+SELECT
+    product_name,
+    list_price
+FROM
+    production.products
+WHERE
+    product_id IN (
+        SELECT
+            product_id
+        FROM
+            production.stocks
+        WHERE
+            store_id = 1 AND quantity >= 30
+    )
+ORDER BY
+    product_name;
+
+SELECT
+    first_name + ' ' + last_name
+FROM
+    sales.customers
+ORDER BY
+    first_name;
+
+SELECT
+    first_name + ' ' + last_name AS 'Full Name'
+FROM
+    sales.customers
+ORDER BY
+    first_name;
+
+
+CREATE SCHEMA hr;
+GO
+
+CREATE TABLE hr.candidates(
+    id INT PRIMARY KEY IDENTITY,
+    fullname VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE hr.employees(
+    id INT PRIMARY KEY IDENTITY,
+    fullname VARCHAR(100) NOT NULL
+);
+
+INSERT INTO 
+    hr.candidates(fullname)
+VALUES
+    ('John Doe'),
+    ('Lily Bush'),
+    ('Peter Drucker'),
+    ('Jane Doe');
+
+
+INSERT INTO 
+    hr.employees(fullname)
+VALUES
+    ('John Doe'),
+    ('Jane Doe'),
+    ('Michael Scott'),
+    ('Jack Sparrow');
+
+--INNER JOIN 
+SELECT  
+    c.id candidate_id,
+    c.fullname candidate_name,
+    e.id employee_id,
+    e.fullname employee_name
+FROM 
+    hr.candidates c
+    INNER JOIN hr.employees e 
+        ON e.fullname = c.fullname;
+
+--LEFT JOIN
+SELECT  
+	c.id candidate_id,
+	c.fullname candidate_name,
+	e.id employee_id,
+	e.fullname employee_name
+FROM 
+	hr.candidates c
+	LEFT JOIN hr.employees e 
+		ON e.fullname = c.fullname;
+
+--RIGHT JOIN
+SELECT  
+    c.id candidate_id,
+    c.fullname candidate_name,
+    e.id employee_id,
+    e.fullname employee_name
+FROM 
+    hr.candidates c
+    RIGHT JOIN hr.employees e 
+        ON e.fullname = c.fullname;
+
+--FULL JOIN
+SELECT  
+    c.id candidate_id,
+    c.fullname candidate_name,
+    e.id employee_id,
+    e.fullname employee_name
+FROM 
+    hr.candidates c
+    FULL JOIN hr.employees e 
+        ON e.fullname = c.fullname;
+
+SELECT  
+    c.id candidate_id,
+    c.fullname candidate_name,
+    e.id employee_id,
+    e.fullname employee_name
+FROM 
+    hr.candidates c
+    FULL JOIN hr.employees e 
+        ON e.fullname = c.fullname
+WHERE
+    c.id IS NULL OR
+    e.id IS NULL;
+
+SELECT
+    product_name,
+    category_name,
+    brand_name,
+    list_price
+FROM
+    production.products p
+INNER JOIN production.categories c ON c.category_id = p.category_id
+INNER JOIN production.brands b ON b.brand_id = p.brand_id
+ORDER BY
+    product_name DESC;
+
+--CROSS JOIN
+SELECT
+    product_id,
+    product_name,
+    store_id,
+    0 AS quantity
+FROM
+    production.products
+CROSS JOIN sales.stores
+ORDER BY
+    product_name,
+    store_id;
+
+SELECT
+    s.store_id,
+    p.product_id,
+    ISNULL(sales, 0) sales
+FROM
+    sales.stores s
+CROSS JOIN production.products p
+LEFT JOIN (
+    SELECT
+        s.store_id,
+        p.product_id,
+        SUM (quantity * i.list_price) sales
+    FROM
+        sales.orders o
+    INNER JOIN sales.order_items i ON i.order_id = o.order_id
+    INNER JOIN sales.stores s ON s.store_id = o.store_id
+    INNER JOIN production.products p ON p.product_id = i.product_id
+    GROUP BY
+        s.store_id,
+        p.product_id
+) c ON c.store_id = s.store_id
+AND c.product_id = p.product_id
+WHERE
+    sales IS NULL
+ORDER BY
+    product_id,
+    store_id;
+
+
+
+--GROUP BY
+SELECT
+    brand_name,
+    MIN (list_price) min_price,
+    MAX (list_price) max_price
+FROM
+    production.products p
+INNER JOIN production.brands b ON b.brand_id = p.brand_id
+WHERE
+    model_year = 2018
+GROUP BY
+    brand_name
+ORDER BY
+    brand_name;
+
+-- HAVING
+SELECT
+    category_id,
+    AVG (list_price) avg_list_price
+FROM
+    production.products
+GROUP BY
+    category_id
+HAVING
+    AVG (list_price) BETWEEN 500 AND 1000;
+
+--UNION ALL
+SELECT
+    brand,
+    category,
+    SUM (sales) sales
+FROM
+    sales.sales_summary
+GROUP BY
+    brand,
+    category
+UNION ALL
+SELECT
+    brand,
+    NULL,
+    SUM (sales) sales
+FROM
+    sales.sales_summary
+GROUP BY
+    brand
+UNION ALL
+SELECT
+    NULL,
+    category,
+    SUM (sales) sales
+FROM
+    sales.sales_summary
+GROUP BY
+    category
+UNION ALL
+SELECT
+    NULL,
+    NULL,
+    SUM (sales)
+FROM
+    sales.sales_summary
+ORDER BY brand, category;
+
+--GROUPING SET
+SELECT
+    GROUPING(brand) grouping_brand,
+    GROUPING(category) grouping_category,
+    brand,
+    category,
+    SUM (sales) sales
+FROM
+    sales.sales_summary
+GROUP BY
+    GROUPING SETS (
+        (brand, category),
+        (brand),
+        (category),
+        ()
+    )
+ORDER BY
+    brand,
+    category;
+
+--CUBE
+SELECT
+    brand,
+    category,
+    SUM (sales) sales
+FROM
+    sales.sales_summary
+GROUP BY
+    CUBE(brand, category);
+
+--ROLLUP
+SELECT
+    category,
+    brand,
+    SUM (sales) sales
+FROM
+    sales.sales_summary
+GROUP BY
+    ROLLUP (category, brand);
+
+--CORRELATED SUBQUERY
+SELECT
+    product_name,
+    list_price,
+    category_id
+FROM
+    production.products p1
+WHERE
+    list_price IN (
+        SELECT
+            MAX (p2.list_price)
+        FROM
+            production.products p2
+        WHERE
+            p2.category_id = p1.category_id
+        GROUP BY
+            p2.category_id
+    )
+ORDER BY
+    category_id,
+    product_name;
+
+--EXIST
+SELECT
+    customer_id,
+    first_name,
+    last_name
+FROM
+    sales.customers c
+WHERE
+    EXISTS (
+        SELECT
+            COUNT (*)
+        FROM
+            sales.orders o
+        WHERE
+            customer_id = c.customer_id
+        GROUP BY
+            customer_id
+        HAVING
+            COUNT (*) > 2
+    )
+ORDER BY
+    first_name,
+    last_name;
+
+--ALL
+SELECT
+    product_name,
+    list_price
+FROM
+    production.products
+WHERE
+    list_price < ALL (
+        SELECT
+            AVG (list_price) avg_list_price
+        FROM
+            production.products
+        GROUP BY
+            brand_id
+    )
+ORDER BY
+    list_price DESC;
+
+--UNION
+SELECT
+    first_name,
+    last_name
+FROM
+    sales.staffs
+UNION ALL
+SELECT
+    first_name,
+    last_name
+FROM
+    sales.customers
+ORDER BY
+    first_name,
+    last_name;
+
+--INTERSECT
+SELECT
+    city
+FROM
+    sales.customers
+INTERSECT
+SELECT
+    city
+FROM
+    sales.stores
+ORDER BY
+    city;
+
+--EXCEPT
+SELECT
+    product_id
+FROM
+    production.products
+EXCEPT
+SELECT
+    product_id
+FROM
+    sales.order_items
+ORDER BY 
+	product_id;
+
+CREATE TABLE sales.taxes (
+	tax_id INT PRIMARY KEY IDENTITY (1, 1),
+	state VARCHAR (50) NOT NULL UNIQUE,
+	state_tax_rate DEC (3, 2),
+	avg_local_tax_rate DEC (3, 2),
+	combined_rate AS state_tax_rate + avg_local_tax_rate,
+	max_local_tax_rate DEC (3, 2),
+	updated_at datetime
+);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Alabama',0.04,0.05,0.07);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Alaska',0,0.01,0.07);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Arizona',0.05,0.02,0.05);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Arkansas',0.06,0.02,0.05);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('California',0.07,0.01,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Colorado',0.02,0.04,0.08);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Connecticut',0.06,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Delaware',0,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Florida',0.06,0,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Georgia',0.04,0.03,0.04);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Hawaii',0.04,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Idaho',0.06,0,0.03);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Illinois',0.06,0.02,0.04);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Indiana',0.07,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Iowa',0.06,0,0.01);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Kansas',0.06,0.02,0.04);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Kentucky',0.06,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Louisiana',0.05,0.04,0.07);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Maine',0.05,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Maryland',0.06,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Massachusetts',0.06,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Michigan',0.06,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Minnesota',0.06,0,0.01);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Mississippi',0.07,0,0.01);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Missouri',0.04,0.03,0.05);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Montana',0,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Nebraska',0.05,0.01,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Nevada',0.06,0.01,0.01);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('New Hampshire',0,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('New Jersey',0.06,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('New Mexico',0.05,0.02,0.03);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('New York',0.04,0.04,0.04);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('North Carolina',0.04,0.02,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('North Dakota',0.05,0.01,0.03);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Ohio',0.05,0.01,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Oklahoma',0.04,0.04,0.06);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Oregon',0,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Pennsylvania',0.06,0,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Rhode Island',0.07,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('South Carolina',0.06,0.01,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('South Dakota',0.04,0.01,0.04);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Tennessee',0.07,0.02,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Texas',0.06,0.01,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Utah',0.05,0,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Vermont',0.06,0,0.01);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Virginia',0.05,0,0);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Washington',0.06,0.02,0.03);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('West Virginia',0.06,0,0.01);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Wisconsin',0.05,0,0.01);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('Wyoming',0.04,0.01,0.02);
+INSERT INTO sales.taxes(state,state_tax_rate,avg_local_tax_rate,max_local_tax_rate) VALUES('D.C.',0.05,0,0);
+
+Date: 02/09/21
+
+--UPDATE
+UPDATE sales.taxes
+SET max_local_tax_rate += 0.02,
+    avg_local_tax_rate += 0.01
+WHERE
+    max_local_tax_rate = 0.01;
+
+DROP TABLE IF EXISTS sales.targets;
+
+CREATE TABLE sales.targets
+(
+    target_id  INT	PRIMARY KEY, 
+    percentage DECIMAL(4, 2) 
+        NOT NULL DEFAULT 0
+);
+
+INSERT INTO 
+    sales.targets(target_id, percentage)
+VALUES
+    (1,0.2),
+    (2,0.3),
+    (3,0.5),
+    (4,0.6),
+    (5,0.8);
+
+CREATE TABLE sales.commissions
+(
+    staff_id    INT PRIMARY KEY, 
+    target_id   INT, 
+    base_amount DECIMAL(10, 2) 
+        NOT NULL DEFAULT 0, 
+    commission  DECIMAL(10, 2) 
+        NOT NULL DEFAULT 0, 
+    FOREIGN KEY(target_id) 
+        REFERENCES sales.targets(target_id), 
+    FOREIGN KEY(staff_id) 
+        REFERENCES sales.staffs(staff_id),
+);
+
+INSERT INTO 
+    sales.commissions(staff_id, base_amount, target_id)
+VALUES
+    (1,100000,2),
+    (2,120000,1),
+    (3,80000,3),
+    (4,900000,4),
+    (5,950000,5);
+
+--UPDATE JOIN
+UPDATE
+    sales.commissions
+SET
+    sales.commissions.commission = 
+        c.base_amount * t.percentage
+FROM 
+    sales.commissions c
+    INNER JOIN sales.targets t
+        ON c.target_id = t.target_id;
+
+--DELETE
+DELETE FROM target_table;
+
+CREATE TABLE sales.category (
+    category_id INT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL,
+    amount DECIMAL(10 , 2 )
+);
+
+INSERT INTO sales.category(category_id, category_name, amount)
+VALUES(1,'Children Bicycles',15000),
+    (2,'Comfort Bicycles',25000),
+    (3,'Cruisers Bicycles',13000),
+    (4,'Cyclocross Bicycles',10000);
+
+
+CREATE TABLE sales.category_staging (
+    category_id INT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL,
+    amount DECIMAL(10 , 2 )
+);
+
+
+INSERT INTO sales.category_staging(category_id, category_name, amount)
+VALUES(1,'Children Bicycles',15000),
+    (3,'Cruisers Bicycles',13000),
+    (4,'Cyclocross Bicycles',20000),
+    (5,'Electric Bikes',10000),
+    (6,'Mountain Bikes',10000);
+
+--MERGE
+MERGE sales.category t 
+    USING sales.category_staging s
+ON (s.category_id = t.category_id)
+WHEN MATCHED
+    THEN UPDATE SET 
+        t.category_name = s.category_name,
+        t.amount = s.amount
+WHEN NOT MATCHED BY TARGET 
+    THEN INSERT (category_id, category_name, amount)
+         VALUES (s.category_id, s.category_name, s.amount)
+WHEN NOT MATCHED BY SOURCE 
+    THEN DELETE;
+
+--PIVOT
+SELECT * FROM   
+(
+    SELECT 
+        category_name, 
+        product_id
+    FROM 
+        production.products p
+        INNER JOIN production.categories c 
+            ON c.category_id = p.category_id
+) t 
+PIVOT(
+    COUNT(product_id) 
+    FOR category_name IN (
+        [Children Bicycles], 
+        [Comfort Bicycles], 
+        [Cruisers Bicycles], 
+        [Cyclocross Bicycles], 
+        [Electric Bikes], 
+        [Mountain Bikes], 
+        [Road Bikes])
+) AS pivot_table;
+
+
+DATA DEFINITION
+
+--CREATE DATABASE
+CREATE DATABASE TestDb;
+
+--DROP DATABASE
+DROP DATABASE IF EXISTS TestDb;
+
+--CREATE SCHEMA
+CREATE SCHEMA customer_services;
+GO
+
+--ALTER SCHEMA
+CREATE TABLE dbo.offices
+(
+    office_id      INT
+    PRIMARY KEY IDENTITY, 
+    office_name    NVARCHAR(40) NOT NULL, 
+    office_address NVARCHAR(255) NOT NULL, 
+    phone          VARCHAR(20),
+);
+
+INSERT INTO 
+    dbo.offices(office_name, office_address)
+VALUES
+    ('Silicon Valley','400 North 1st Street, San Jose, CA 95130'),
+    ('Sacramento','1070 River Dr., Sacramento, CA 95820');
+
+ALTER SCHEMA sales TRANSFER OBJECT::dbo.offices;  
+
+CREATE TABLE logistics.deliveries
+(
+    order_id        INT
+    PRIMARY KEY, 
+    delivery_date   DATE NOT NULL, 
+    delivery_status TINYINT NOT NULL
+);
+
+--DROP SCHEMA
+DROP SCHEMA IF EXISTS logistics;
+
+--CREATE TABLE
+CREATE TABLE sales.visits (
+    visit_id INT PRIMARY KEY IDENTITY (1, 1),
+    first_name VARCHAR (50) NOT NULL,
+    last_name VARCHAR (50) NOT NULL,
+    visited_at DATETIME,
+    phone VARCHAR(20),
+    store_id INT NOT NULL,
+    FOREIGN KEY (store_id) REFERENCES sales.stores (store_id)
+);
+
+--IDENTITY COLUMN
+CREATE TABLE hr.person (
+    person_id INT IDENTITY(1,1) PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    gender CHAR(1) NOT NULL
+);
+INSERT INTO hr.person(first_name, last_name, gender)
+OUTPUT inserted.person_id
+VALUES('John','Doe', 'M');
+
+--SEQUENCE
+CREATE SEQUENCE item_counter
+    AS INT
+    START WITH 10
+    INCREMENT BY 10;
+
+CREATE TABLE sales.quotations (
+    quotation_no INT IDENTITY PRIMARY KEY,
+    valid_from DATE NOT NULL,
+    valid_to DATE NOT NULL
+);
+
+Date: 03/09/21
+
+--ADD COLUMN
+ALTER TABLE sales.quotations 
+ADD description VARCHAR (255) NOT NULL;
+
+CREATE TABLE sales.price_lists(
+    product_id int,
+    valid_from DATE,
+    price DEC(10,2) NOT NULL CONSTRAINT ck_positive_price CHECK(price >= 0),
+    discount DEC(10,2) NOT NULL,
+    surcharge DEC(10,2) NOT NULL,
+    note VARCHAR(255),
+    PRIMARY KEY(product_id, valid_from)
+); 
+
+--DROP COLUMN
+ALTER TABLE sales.price_lists
+DROP COLUMN note;
+
+CREATE TABLE sales.customer_groups (
+    group_id INT PRIMARY KEY IDENTITY,
+    group_name VARCHAR (50) NOT NULL
+);
+
+INSERT INTO sales.customer_groups (group_name)
+VALUES
+    ('Intercompany'),
+    ('Third Party'),
+    ('One time');
+
+--TRUNCATE TABLE
+INSERT INTO sales.customer_groups (group_name)
+VALUES
+    ('Intercompany'),
+    ('Third Party'),
+    ('One time');   
+
+TRUNCATE TABLE sales.customer_groups;
+
+--TEMPORARY TABLE
+CREATE TABLE #haro_products (
+    product_name VARCHAR(MAX),
+    list_price DEC(10,2)
+);
+INSERT INTO #haro_products
+SELECT
+    product_name,
+    list_price
+FROM 
+    production.products
+WHERE
+    brand_id = 2;
+
+--SYNONYM
+CREATE SYNONYM orders FOR sales.orders;
+
+--SELECT INTO
+SELECT 
+    *
+INTO 
+    marketing.customers
+FROM 
+    sales.customers;
+
+--PRIMARY KEY
+CREATE TABLE sales.activities (
+    activity_id INT PRIMARY KEY IDENTITY,
+    activity_name VARCHAR (255) NOT NULL,
+    activity_date DATE NOT NULL
+);
+
+--FORIEGN KEY
+CREATE TABLE procurement.vendor_groups (
+    group_id INT IDENTITY PRIMARY KEY,
+    group_name VARCHAR (100) NOT NULL
+);
+
+CREATE TABLE procurement.vendors (
+        vendor_id INT IDENTITY PRIMARY KEY,
+        vendor_name VARCHAR(100) NOT NULL,
+        group_id INT NOT NULL,
+);
+
+DROP TABLE vendors;
+
+CREATE TABLE procurement.vendors (
+        vendor_id INT IDENTITY PRIMARY KEY,
+        vendor_name VARCHAR(100) NOT NULL,
+        group_id INT NOT NULL,
+        CONSTRAINT fk_group FOREIGN KEY (group_id) 
+        REFERENCES procurement.vendor_groups(group_id)
+);
+
+--CHECK CONSTRAINT
+CREATE SCHEMA test;
+GO
+
+CREATE TABLE test.products(
+    product_id INT IDENTITY PRIMARY KEY,
+    product_name VARCHAR(255) NOT NULL,
+    unit_price DEC(10,2) CHECK(unit_price > 0)
+);
+
+CREATE TABLE test.products(
+    product_id INT IDENTITY PRIMARY KEY,
+    product_name VARCHAR(255) NOT NULL,
+    unit_price DEC(10,2) CONSTRAINT positive_price CHECK(unit_price > 0)
+);
+
+--UNIQUE CONSTARINT
+CREATE SCHEMA hr;
+GO
+
+CREATE TABLE hr.persons(
+    person_id INT IDENTITY PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE
+);
+CREATE TABLE hr.persons(
+    person_id INT IDENTITY PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    UNIQUE(email)
+);
+
+-- NOT NULL
+CREATE SCHEMA hr;
+GO
+
+CREATE TABLE hr.persons(
+    person_id INT IDENTITY PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20)
+);
+
+UPDATE table_name
+SET column_name = <value>
+WHERE column_name IS NULL;
+
+ALTER TABLE table_name
+ALTER COLUMN column_name data_type NOT NULL;
+
+
+
+
+
+
+
+
+
+
