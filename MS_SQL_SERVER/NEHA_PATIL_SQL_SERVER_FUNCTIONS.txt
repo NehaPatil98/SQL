@@ -1,0 +1,367 @@
+Date:03/09/21
+
+FUNCTIONS
+
+***AGGREGATE FUNCTIONS***
+--AVG
+SELECT
+    AVG(list_price) avg_product_price
+FROM
+    production.products;
+
+--COUNT
+SELECT
+    COUNT(*) product_count
+FROM
+    production.products
+WHERE
+    list_price > 500;
+
+--MAX
+SELECT
+    MAX(list_price) max_list_price
+FROM
+    production.products;
+
+--MIN
+SELECT
+    MIN(list_price) min_list_price
+FROM
+    production.products;     
+
+--SUM
+SELECT 
+    product_id, 
+    SUM(quantity) stock_count
+FROM 
+    production.stocks
+GROUP BY
+    product_id
+ORDER BY 
+    stock_count DESC;
+
+--STDEV
+SELECT
+    CAST(ROUND(STDEV(list_price),2) as DEC(10,2)) stdev_list_price
+FROM
+    production.products;
+
+***WINDOWS FUNCTION***
+--CUME_DIST
+SELECT 
+    CONCAT_WS(' ',first_name,last_name) full_name,
+    net_sales, 
+    CUME_DIST() OVER (
+        ORDER BY net_sales DESC
+    ) cume_dist
+FROM 
+    sales.vw_staff_sales t
+INNER JOIN sales.staffs m on m.staff_id = t.staff_id
+WHERE 
+    year = 2017;
+
+--DENSE_RANK
+SELECT
+	product_id,
+	product_name,
+	list_price,
+	DENSE_RANK () OVER ( 
+		ORDER BY list_price DESC
+	) price_rank 
+FROM
+	production.products;
+
+--FIRST_VALUE
+SELECT 
+    category_name,
+    year,
+    qty,
+    FIRST_VALUE(category_name) OVER(
+        ORDER BY qty
+    ) lowest_sales_volume
+FROM 
+    sales.vw_category_sales_volume
+WHERE
+    year = 2017;
+
+--LAG
+WITH cte_netsales_2018 AS(
+	SELECT 
+		month, 
+		SUM(net_sales) net_sales
+	FROM 
+		sales.vw_netsales_brands
+	WHERE 
+		year = 2018
+	GROUP BY 
+		month
+)
+SELECT 
+	month,
+	net_sales,
+	LAG(net_sales,1) OVER (
+		ORDER BY month
+	) previous_month_sales
+FROM 
+	cte_netsales_2018;
+
+--LAST VALUE
+SELECT 
+    category_name,
+    year,
+    qty,
+    LAST_VALUE(category_name) OVER(
+        ORDER BY qty
+         RANGE BETWEEN 
+            UNBOUNDED PRECEDING AND 
+            UNBOUNDED FOLLOWING
+    ) highest_sales_volume
+FROM 
+    sales.vw_category_sales_volume
+WHERE
+    year = 2016;
+
+--LEAD
+WITH cte_netsales_2017 AS(
+	SELECT 
+		month, 
+		SUM(net_sales) net_sales
+	FROM 
+		sales.vw_netsales_brands
+	WHERE 
+		year = 2017
+	GROUP BY 
+		month
+)
+SELECT 
+	month,
+	net_sales,
+	LEAD(net_sales,1) OVER (
+		ORDER BY month
+	) next_month_sales
+FROM 
+	cte_netsales_2017;
+
+--NTILE
+CREATE TABLE sales.ntile_demo (
+	v INT NOT NULL
+);
+	
+INSERT INTO sales.ntile_demo(v) 
+VALUES(1),(2),(3),(4),(5),(6),(7),(8),(9),(10);
+	
+	
+SELECT * FROM sales.ntile_demo;
+
+
+
+SELECT 
+	v, 
+	NTILE (3) OVER (
+		ORDER BY v
+	) buckets
+FROM 
+	sales.ntile_demo;
+
+--PERCENT TANK
+
+SELECT 
+    CONCAT_WS(' ',first_name,last_name) full_name,
+    net_sales, 
+    PERCENT_RANK() OVER (
+        ORDER BY net_sales DESC
+    ) percent_rank
+FROM 
+    sales.vw_staff_sales t
+INNER JOIN sales.staffs m on m.staff_id = t.staff_id
+WHERE 
+    YEAR = 2016;
+
+
+--RANK
+SELECT
+	v,
+	RANK () OVER ( 
+		ORDER BY v 
+	) rank_no 
+FROM
+	sales.rank_demo;
+
+--ROW NUMBER
+SELECT 
+   first_name, 
+   last_name, 
+   city,
+   ROW_NUMBER() OVER (
+      PARTITION BY city
+      ORDER BY first_name
+   ) row_num
+FROM 
+   sales.customers
+ORDER BY 
+   city;
+
+***DATE FUNCTION***
+
+--CURRENT_TIMESTAMP
+SELECT 
+    CURRENT_TIMESTAMP AS current_date_time;
+
+--GETDATE
+SELECT 
+    GETDATE() current_date_time;
+
+--SYSDATETIME
+SELECT 
+    CONVERT(DATE, SYSDATETIME());
+
+--DATEPART
+DECLARE @d DATETIME = '2019-01-01 14:30:14';
+SELECT 
+   DATEPART(year, @d) year, 
+   DATEPART(quarter, @d) quarter, 
+   DATEPART(month, @d) month, 
+   DATEPART(day, @d) day, 
+   DATEPART(hour, @d) hour, 
+   DATEPART(minute, @d) minute, 
+   DATEPART(second, @d) second;
+
+--ISDATE
+SELECT 
+    ISDATE('2020-06-15') is_date
+
+--DATEFROMPARTS
+SELECT 
+    DATEFROMPARTS(2020,12,31) a_date;
+
+--DATEADD
+SELECT 
+    DATEADD(second, 1, '2018-12-31 23:59:59') result;
+
+
+***STRING FUNCTION***
+
+--ASCII
+WITH cte AS(
+    SELECT  
+        CHAR(ASCII('A')) [char], 
+        1 [count]
+    UNION ALL
+    SELECT  
+        CHAR(ASCII('A') + cte.count) [char], 
+        cte.count + 1 [count]
+    FROM    
+        cte
+)
+SELECT  
+    TOP(26) cte.char
+FROM
+    cte;
+
+--CHAR
+SELECT 'Hello,' + CHAR(10) + 'There' AS Result;
+
+--CONCAT
+SELECT 
+    CONCAT(
+        CHAR(13),
+        CONCAT(first_name,' ',last_name),
+        CHAR(13),
+        phone,
+        CHAR(13),
+        CONCAT(city,' ',state),
+        CHAR(13),
+        zip_code
+    ) customer_address
+FROM
+    sales.customers
+ORDER BY 
+    first_name,
+    last_name;
+
+--CONCAT_WS
+SELECT 
+    CONCAT_WS(' ', 'John', 'Doe') full_name
+
+--DIFFERENCE
+SELECT 
+    SOUNDEX('Two') soundex_two,
+    SOUNDEX('Too') soundex_too,
+    DIFFERENCE('Two', 'Too') similarity;
+
+--LEFT
+SELECT LEFT('SQL Server',3) Result_string;
+
+--LEN
+SELECT
+    product_name,
+    LEN(product_name) product_name_length
+FROM
+    production.products
+ORDER BY
+    LEN(product_name) DESC;
+
+--LOWER
+SELECT 
+    first_name, 
+    last_name, 
+    CONCAT_WS(
+        ' ', 
+        LOWER(first_name), 
+        LOWER(last_name)
+    ) full_name_lowercase
+FROM 
+    sales.customers
+ORDER BY 
+    first_name, 
+    last_name;
+
+--LTRIM
+SELECT 
+    LTRIM(value) part
+FROM 
+    STRING_SPLIT('Doe, John', ',');
+
+--STR
+SELECT 
+    'index' + STR(1,1,1) result;
+
+***SYSTEM FUNCTION***
+
+--CAST
+SELECT CAST(5.95 AS INT) result;
+
+--CONVERT
+SELECT CONVERT(INT, 9.95) result;
+
+--CHOOSE
+SELECT 
+    CHOOSE(2, 'First', 'Second', 'Third') Result;
+
+--IIF
+SELECT 
+    IIF(10 < 20, 'True', 'False') Result ;
+
+--TRY_CAST
+SELECT 
+    TRY_CAST('12.34' AS DECIMAL(4, 2)) Result
+
+--TRY_CONVERT
+SELECT 
+    TRY_CONVERT(DECIMAL(4,2), '12.34');
+
+--TRY_PARSE
+SELECT 
+    TRY_PARSE('ABC' AS DEC) result;
+
+--CONVERT DATETIME TO STRING
+DECLARE @dt DATETIME = '2019-12-31 14:43:35.863';
+
+SELECT 
+    CONVERT(VARCHAR(20),@dt,0) s1,
+    CONVERT(VARCHAR(20),@dt,100) s2;
+
+
+
+
+
